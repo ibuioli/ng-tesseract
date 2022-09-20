@@ -28,4 +28,40 @@ export class TesseractService {
 
     return ocr$;
   }
+  
+  public imageRectToText(img: string, lang: string, rectangle: any): any {
+    const ocr$ = new Observable(observer => {
+      (async () => {
+        await this.worker.load();
+        await this.worker.loadLanguage(lang);
+        await this.worker.initialize(lang);
+        const { data: { text } } = await this.worker.recognize(img, { rectangle });
+        observer.next(text);
+        this.worker.terminate();
+        observer.complete();
+      })();
+    });
+
+    return ocr$;
+  }
+
+  public imageRectsToText(img: string, lang: string, rectangles: any): any {
+    const ocr$ = new Observable(observer => {
+      (async () => {
+        await this.worker.load();
+        await this.worker.loadLanguage(lang);
+        await this.worker.initialize(lang);
+        const values = [];
+        for (let i = 0; i < rectangles.length; i++) {
+          const { data: { text } } = await this.worker.recognize(img, { rectangle: rectangles[i] });
+          values.push(text);
+        }
+        observer.next(values);
+        this.worker.terminate();
+        observer.complete();
+      })();
+    });
+
+    return ocr$;
+  }
 }
