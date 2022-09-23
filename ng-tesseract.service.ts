@@ -21,14 +21,13 @@ export class TesseractService {
         await this.worker.initialize(lang);
         const { data: { text } } = await this.worker.recognize(img);
         observer.next(text);
-        this.worker.terminate();
         observer.complete();
       })();
     });
 
     return ocr$;
   }
-  
+
   public imageRectToText(img: string, lang: string, rectangle: any): any {
     const ocr$ = new Observable(observer => {
       (async () => {
@@ -37,7 +36,6 @@ export class TesseractService {
         await this.worker.initialize(lang);
         const { data: { text } } = await this.worker.recognize(img, { rectangle });
         observer.next(text);
-        this.worker.terminate();
         observer.complete();
       })();
     });
@@ -57,11 +55,14 @@ export class TesseractService {
           values.push(text);
         }
         observer.next(values);
-        this.worker.terminate();
         observer.complete();
       })();
     });
 
     return ocr$;
+  }
+
+  public terminateWorker(): void {
+    this.worker.terminate();
   }
 }
